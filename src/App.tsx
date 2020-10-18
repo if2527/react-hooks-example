@@ -16,7 +16,7 @@ const App: React.FC = () => {
     async function fetchMyAPI() {
       try {
         let postsData = await fetch(
-          "http://jsonplaceholder.typicode.com/posts?_start=1&_limit=10"
+          "https://jsonplaceholder.typicode.com/posts?_start=1&_limit=10"
         );
         postsData = await postsData.json();
 
@@ -35,7 +35,7 @@ const App: React.FC = () => {
     }
 
     setIdActivePost(id);
-    fetch(`http://jsonplaceholder.typicode.com/comments?postId=${id}`)
+    fetch(`https://jsonplaceholder.typicode.com/comments?postId=${id}`)
       .then((response) => response.json())
       .then((dataComments) => setComments(dataComments));
   };
