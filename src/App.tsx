@@ -1,26 +1,65 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import "./App.css";
 
-function App() {
+import { IComment, IPost } from "./interfaces";
+import { Posts } from "./components/Posts/index";
+import { Context } from "./context";
+import { CommentsList } from "./components/CommentsList";
+
+const App: React.FC = () => {
+  const [posts, setPosts] = useState<IPost[] | any>([]);
+  const [idActivePost, setIdActivePost] = useState<number | null>(null);
+  const [comments, setComments] = useState<IComment[]>([]);
+
+  const body = document.getElementsByTagName("body")[0];
+  useEffect(() => {
+    async function fetchMyAPI() {
+      try {
+        let postsData = await fetch(
+          "http://jsonplaceholder.typicode.com/posts?_start=1&_limit=10"
+        );
+        postsData = await postsData.json();
+
+        setPosts(postsData);
+      } catch (e) {
+        console.log('.....', e);
+      }
+    }
+
+    fetchMyAPI();
+  }, []);
+
+  const clickPost = (id: number): void => {
+    if (!body.classList.contains("no-scroll")) {
+      body.classList.add("no-scroll");
+    }
+
+    setIdActivePost(id);
+    fetch(`http://jsonplaceholder.typicode.com/comments?postId=${id}`)
+      .then((response) => response.json())
+      .then((dataComments) => setComments(dataComments));
+  };
+
+  const closeModal = () => {
+    setComments([]);
+    setIdActivePost(null);
+    if (body.classList.contains("no-scroll")) {
+      body.classList.remove("no-scroll");
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Context.Provider value={{ clickPost, closeModal, idActivePost }}>
+      <div className="wrapper">
+        <h1 style={{textAlign: 'center'}}>Posts: </h1>
+        {!posts.length ? (
+          <p>You do not have any posts!</p>
+        ) : (
+          <Posts posts={posts} />
+        )}
+        {comments.length > 0 && <CommentsList comments={comments} />}
+      </div>
+    </Context.Provider>
   );
-}
-
+};
 export default App;
